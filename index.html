@@ -3695,7 +3695,7 @@ function askPrint(d,cash,wa,done){
  o.innerHTML=`<div style="background:var(--bg2);color:var(--white);border:1px solid var(--gold3);border-radius:18px;padding:20px;width:100%;max-width:360px;text-align:center;font-family:Cairo,sans-serif"><div style="font-size:34px">✅</div><div style="font-weight:900;font-size:16px;margin:6px 0">تم حفظ الفاتورة</div><div style="color:var(--muted);font-size:13px">${esc(d.invoiceNo)}${cash?(d.remaining>0?' — دفعة جزئية 💵':' — نقدية 💵'):''}</div><button id="mxAp" style="${bs}background:var(--gold);color:#fff;border:0">🖨 طباعة الفاتورة</button>${cash?`<button id="mxAr" style="${bs}background:var(--gold);color:#fff;border:0">🧾 طباعة سند القبض</button>`:''}<button id="mxAa" style="${bs}background:var(--bg3);color:var(--white)">🖨 طباعة بديلة (صفحة مستقلة)</button><button id="mxAn" style="${bs}background:var(--bg3);color:var(--white)">${wa?'متابعة ('+(wa.label||'واتساب')+') ➜':'فاتورة جديدة ➜'}</button></div>`;
  document.body.appendChild(o);
  const fin=()=>{o.remove();const q=$('mxP');if(q)q.remove();if(wa)wa();else done()};
- $('mxAp').onclick=()=>oldIframePrint(invHTML(invNorm(d)));
+ $('mxAp').onclick=()=>{const h=invHTML(invNorm(d));if(isApple())applePrint(h,null);else oldIframePrint(h)};
  if($('mxAr'))$('mxAr').onclick=()=>applePrint('',rcOf(d));
  $('mxAa').onclick=()=>applePrint(invHTML(invNorm(d)),null);
  $('mxAn').onclick=fin}
