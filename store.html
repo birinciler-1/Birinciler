@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>متجر BİRİNCİLER</title>
+<link rel="icon" type="image/png" href="logo-app.png">
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0d1117;--bg2:#161b22;--bg3:#1c2330;--gold:#c9a84c;--gold3:#a07830;--white:#f0f6fc;--muted:#8b949e;--red:#d73a49;--green:#3fb950;--bdr:#30363d}
+@media (prefers-color-scheme:light){:root{--bg:#f0f2f5;--bg2:#fff;--bg3:#e4e8ef;--white:#1a1a2e;--muted:#5a6375;--bdr:#cdd2dc}}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;font-family:Cairo,Arial,sans-serif;background:var(--bg);color:var(--white);padding-bottom:84px}
+header{position:sticky;top:0;z-index:20;background:var(--bg3);border-bottom:2px solid var(--gold);padding:10px 14px}
+.hr{display:flex;align-items:center;gap:10px}
+.hr img{height:38px;width:auto}
+.hr b{font-size:17px;color:var(--gold);letter-spacing:.5px}
+.hr small{color:var(--muted);display:block;font-size:11px}
+.bar{display:flex;gap:8px;margin-top:8px}
+.bar input,.bar select{flex:1;min-width:0;padding:10px 12px;border-radius:12px;border:1px solid var(--bdr);background:var(--bg2);color:var(--white);font:inherit;font-size:14px}
+.bar select{flex:0 0 38%}
+main{padding:12px;display:grid;grid-template-columns:repeat(2,1fr);gap:10px;max-width:1100px;margin:auto}
+@media(min-width:640px){main{grid-template-columns:repeat(3,1fr)}}
+@media(min-width:900px){main{grid-template-columns:repeat(4,1fr)}}
+.card{background:var(--bg2);border:1px solid var(--bdr);border-radius:14px;overflow:hidden;display:flex;flex-direction:column}
+.im{aspect-ratio:1/1;background:#fff;display:flex;align-items:center;justify-content:center;position:relative}
+.im img{width:100%;height:100%;object-fit:contain}
+.im span{color:#999;font-size:30px}
+.tag{position:absolute;top:6px;right:6px;font-size:10px;font-weight:700;padding:2px 7px;border-radius:99px;background:var(--green);color:#000}
+.tag.no{background:var(--red);color:#fff}
+.ci{padding:8px 10px;flex:1;display:flex;flex-direction:column;gap:4px}
+.nm{font-size:13px;font-weight:700;line-height:1.35;min-height:35px}
+.co{font-size:11px;color:var(--muted)}
+.pr{font-size:15px;font-weight:900;color:var(--gold)}
+.pk{font-size:11px;color:var(--muted)}
+.ad{display:flex;gap:6px;align-items:center;margin-top:auto}
+.ad input{width:52px;padding:7px 2px;text-align:center;border-radius:10px;border:1px solid var(--bdr);background:var(--bg);color:var(--white);font:inherit}
+.ad button{flex:1;padding:8px;border:0;border-radius:10px;background:var(--gold);color:#000;font:inherit;font-weight:800;cursor:pointer}
+.ad button:disabled{background:var(--bdr);color:var(--muted)}
+.empty{grid-column:1/-1;text-align:center;color:var(--muted);padding:40px 0}
+#cartBar{position:fixed;left:0;right:0;bottom:0;z-index:30;padding:10px 14px calc(10px + env(safe-area-inset-bottom));background:var(--bg3);border-top:2px solid var(--gold);display:none;align-items:center;justify-content:space-between;gap:10px}
+#cartBar button{padding:11px 20px;border:0;border-radius:12px;background:var(--gold);color:#000;font:inherit;font-weight:900;font-size:15px;cursor:pointer}
+.ovl{position:fixed;inset:0;background:#000b;z-index:50;display:none;align-items:flex-end;justify-content:center}
+.ovl.on{display:flex}
+.box{background:var(--bg);width:100%;max-width:560px;max-height:92vh;overflow:auto;border-radius:18px 18px 0 0;padding:16px}
+.box h3{margin:0 0 10px;color:var(--gold)}
+.ln{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--bdr);font-size:13px}
+.ln button{border:0;background:none;color:var(--red);font-size:18px;cursor:pointer}
+.ln input{width:56px;padding:6px 2px;text-align:center;border-radius:8px;border:1px solid var(--bdr);background:var(--bg2);color:var(--white);font:inherit}
+.f label{display:block;font-size:12px;color:var(--muted);margin:10px 0 4px}
+.f input,.f textarea{width:100%;padding:11px;border-radius:12px;border:1px solid var(--bdr);background:var(--bg2);color:var(--white);font:inherit}
+.btn{width:100%;margin-top:14px;padding:13px;border:0;border-radius:12px;background:var(--gold);color:#000;font:inherit;font-weight:900;font-size:16px;cursor:pointer}
+.btn.g{background:var(--bg3);color:var(--white);margin-top:8px}
+.tot{display:flex;justify-content:space-between;font-weight:900;font-size:16px;margin-top:10px}
+.hp{position:absolute;left:-9999px;opacity:0}
+#toast{position:fixed;top:14px;left:50%;transform:translateX(-50%);background:var(--green);color:#000;padding:8px 16px;border-radius:99px;font-weight:700;z-index:99;display:none}
+.ok{text-align:center;padding:20px 6px}.ok .big{font-size:54px}
+</style>
+</head>
+<body>
+<header>
+  <div class="hr"><img id="lg" src="logo-home.webp" onerror="this.style.display='none'"><div><b>BİRİNCİLER</b><small>تصفّح الكتالوج وأرسل طلبك مباشرة</small></div></div>
+  <div class="bar"><input id="q" type="search" placeholder="🔍 ابحث عن مادة..." oninput="draw()"><select id="co" onchange="draw()"><option value="">كل الشركات</option></select></div>
+</header>
+<main id="grid"><div class="empty">جارٍ تحميل الكتالوج...</div></main>
+
+<div id="cartBar"><div><b id="cn">0</b> مادة · <b id="ct">0</b> د.ع</div><button onclick="openCart()">🛒 عرض الطلب</button></div>
+
+<div class="ovl" id="ovl" onclick="if(event.target===this)closeCart()"><div class="box" id="box"></div></div>
+<div id="toast"></div>
+
+<script>
+const FIREBASE_CONFIG={apiKey:"AIzaSyCHZtxm6PPL491WMDxQcyy-998ZTbXiMxs",authDomain:"birinciler-8b5f1.firebaseapp.com",projectId:"birinciler-8b5f1",storageBucket:"birinciler-8b5f1.firebasestorage.app",messagingSenderId:"703469988962",appId:"1:703469988962:web:cc5957e9bc49ccb1eff53b"};
+const GITHUB_USER="birinciler-1",GITHUB_REPO="Birinciler",GITHUB_BRANCH="main";
+const EXCEL_URL=`https://raw.githubusercontent.com/${GITHUB_USER}/${GITHUB_REPO}/${GITHUB_BRANCH}/data.xlsx`;
+const IMAGES_BASE=`https://raw.githubusercontent.com/${GITHUB_USER}/${GITHUB_REPO}/${GITHUB_BRANCH}/images/`;
+firebase.initializeApp(FIREBASE_CONFIG);
+const db=firebase.firestore();
+const $=id=>document.getElementById(id);
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fmt=n=>Number(n||0).toLocaleString('en-US');
+function nrm(x){return String(x==null?'':x).toLowerCase().replace(/[ً-ٰٟـ]/g,'').replace(/[أإآٱ]/g,'ا').replace(/ة/g,'ه').replace(/[ىئ]/g,'ي').replace(/ؤ/g,'و').replace(/ک/g,'ك').replace(/[یێ]/g,'ي').replace(/[٠-٩]/g,d=>'٠١٢٣٤٥٦٧٨٩'.indexOf(d)).replace(/\s+/g,' ').trim()}
+
+let items=[],cart={},shown=[];
+try{cart=JSON.parse(localStorage.getItem('st_cart')||'{}')||{}}catch(e){cart={}}
+const saveCart=()=>{try{localStorage.setItem('st_cart',JSON.stringify(cart))}catch(e){}};
+
+/* ── تحميل الكتالوج: المنشور من المشرف ← ملف data.xlsx ── */
+function xlsxToRows(buf){
+  const wb=XLSX.read(buf,{type:'array'}),ws=wb.Sheets[wb.SheetNames[0]],rows=XLSX.utils.sheet_to_json(ws,{header:1,defval:''});
+  const skip=rows[0]&&typeof rows[0][0]==='string'&&isNaN(Number(rows[0][3])),H=skip?rows[0].map(x=>String(x).trim()):[];
+  const ci=(re,d)=>{const k=H.findIndex(h=>re.test(h));return k>=0?k:d};
+  const cN=ci(/اسم|name/i,0),cC=ci(/^\s*(ال)?كود\s*$|^code$/i,1),cB=ci(/باركود|barcode/i,2),cP=ci(/تعبئة|كرتون|عدد القطع|pack/i,3),
+    cPr=ci(/^(?!.*(شراء|تكلفة|كلفة|cost|buy)).*(سعر|price)/i,4),cCo=ci(/شركة|company|brand/i,5),cR=ci(/باقي|متبقي|مخزون|المخزون|الكمية|رصيد|stock|qty|rem/i,6),cS=ci(/قسم|section|categor/i,7);
+  return(skip?rows.slice(1):rows).filter(r=>String(r[cN]||'').trim()).map(r=>[String(r[cN]).trim(),String(r[cC]||'').trim(),String(r[cB]||'').trim(),Number(r[cP])||0,parseFloat(r[cPr])||0,String(r[cCo]||'').trim(),(Number(String(r[cR]).replace(/[^\d.-]/g,''))||0)>0?1:0,String(r[cS]||'').trim(),'','']);
+}
+async function loadRows(){
+  try{
+    const m=await db.collection('storeCatalog').doc('meta').get();
+    if(m.exists){const d=m.data();
+      const sn=await Promise.all(Array.from({length:d.chunks},(_,i)=>db.collection('storeCatalog').doc('v'+d.version+'_'+i).get()));
+      let rows=[];sn.forEach(s=>{if(!s.exists)throw new Error('missing');rows=rows.concat(JSON.parse(s.data().json))});
+      if(rows.length===d.count){try{localStorage.setItem('st_cat',JSON.stringify(rows))}catch(e){}return rows}
+    }
+  }catch(e){console.warn('catalog',e)}
+  try{const r=await fetch(EXCEL_URL,{cache:'no-store'});if(r.ok)return xlsxToRows(await r.arrayBuffer())}catch(e){}
+  try{const c=JSON.parse(localStorage.getItem('st_cat')||'null');if(c)return c}catch(e){}
+  return [];
+}
+function build(rows){
+  items=rows.map((r,i)=>({id:i,name:r[0],code:r[1],barcode:r[2],pack:r[3],price:r[4],company:r[5],avail:!!r[6],section:r[7]}))
+    .filter(i=>i.price>0);
+  items.forEach(i=>i.h=nrm([i.name,i.code,i.company,i.section].join(' ')));
+  const cos=[...new Set(items.map(i=>i.company).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'ar'));
+  $('co').innerHTML='<option value="">كل الشركات</option>'+cos.map(c=>`<option>${esc(c)}</option>`).join('');
+}
+const byCode=c=>items.find(i=>String(i.code)===String(c));
+
+/* ── العرض ── */
+let lim=60;
+function draw(reset=true){
+  if(reset)lim=60;
+  const qt=nrm($('q').value).split(' ').filter(Boolean),co=$('co').value;
+  shown=items.filter(i=>(!co||i.company===co)&&qt.every(t=>i.h.includes(t)));
+  const g=$('grid');
+  if(!shown.length){g.innerHTML='<div class="empty">لا توجد نتائج</div>';return}
+  g.innerHTML=shown.slice(0,lim).map(i=>`<div class="card"><div class="im"><span>📦</span><img loading="lazy" src="${IMAGES_BASE+encodeURIComponent(String(i.code).trim())}.webp" onerror="this.remove()"><div class="tag ${i.avail?'':'no'}">${i.avail?'متوفر':'غير متوفر'}</div></div>
+  <div class="ci"><div class="nm">${esc(i.name)}</div><div class="co">${esc(i.company)}</div><div class="pr">${fmt(i.price)} د.ع</div>${i.pack?`<div class="pk">التعبئة: ${i.pack}</div>`:''}
+  <div class="ad"><input type="number" inputmode="numeric" min="1" value="${i.pack>0&&i.pack<=24?i.pack:12}" id="q${i.id}"><button ${i.avail?'':'disabled'} onclick="add(${i.id})">${cart[i.code]?'+ زيادة':'+ أضف'}</button></div></div></div>`).join('')+
+  (shown.length>lim?`<div class="empty"><button class="btn g" onclick="lim+=60;draw(false)">عرض المزيد (${shown.length-lim})</button></div>`:'');
+}
+function toast(m){const t=$('toast');t.textContent=m;t.style.display='block';clearTimeout(toast.t);toast.t=setTimeout(()=>t.style.display='none',1400)}
+function add(id){
+  const i=items[id],q=Math.max(1,parseInt($('q'+id).value)||0);
+  cart[i.code]=(cart[i.code]||0)+q;saveCart();bar();toast('✅ أُضيفت: '+i.name);draw(false);
+}
+function total(){return Object.entries(cart).reduce((s,[c,q])=>{const i=byCode(c);return s+(i?i.price*q:0)},0)}
+function bar(){
+  const n=Object.keys(cart).filter(c=>byCode(c)).length;
+  $('cn').textContent=n;$('ct').textContent=fmt(total());$('cartBar').style.display=n?'flex':'none';
+}
+
+/* ── السلة وإرسال الطلب ── */
+function openCart(){
+  const L=Object.entries(cart).filter(([c])=>byCode(c));
+  let sv={};try{sv=JSON.parse(localStorage.getItem('st_cust')||'{}')}catch(e){}
+  $('box').innerHTML=`<h3>🛒 طلبك</h3>`+L.map(([c,q])=>{const i=byCode(c);return`<div class="ln"><div style="flex:1">${esc(i.name)}<br><small style="color:var(--muted)">${fmt(i.price)} د.ع</small></div><input type="number" min="1" value="${q}" onchange="setQ('${esc(c)}',this.value)"><button onclick="del('${esc(c)}')">🗑</button></div>`}).join('')+
+  `<div class="tot"><span>الإجمالي</span><span id="tt">${fmt(total())} د.ع</span></div>
+  <div class="f"><label>الاسم *</label><input id="fn" value="${esc(sv.name||'')}" autocomplete="name"><label>رقم الهاتف *</label><input id="fp" inputmode="tel" value="${esc(sv.phone||'')}" autocomplete="tel"><label>العنوان</label><input id="fa" value="${esc(sv.addr||'')}"><label>ملاحظات</label><textarea id="fo" rows="2"></textarea><input class="hp" id="hp" tabindex="-1" autocomplete="off"></div>
+  <small style="color:var(--muted);display:block;margin-top:8px">الأسعار تقريبية للطلب وتُؤكَّد من فريقنا قبل التجهيز.</small>
+  <button class="btn" id="sb" onclick="send()">إرسال الطلب</button><button class="btn g" onclick="closeCart()">متابعة التسوق</button>`;
+  $('ovl').classList.add('on');
+}
+function closeCart(){$('ovl').classList.remove('on')}
+function setQ(c,v){v=parseInt(v);if(v>0)cart[c]=v;else delete cart[c];saveCart();bar();$('tt').textContent=fmt(total())+' د.ع'}
+function del(c){delete cart[c];saveCart();bar();draw(false);if(Object.keys(cart).length)openCart();else closeCart()}
+async function send(){
+  if($('hp').value)return;
+  const name=$('fn').value.trim(),phone=$('fp').value.trim();
+  if(!name||phone.replace(/\D/g,'').length<7){toast('⚠️ اكتب الاسم ورقم هاتف صحيح');return}
+  const L=Object.entries(cart).map(([c,q])=>{const i=byCode(c);return i?{code:String(c),name:i.name,qty:q,price:i.price}:null}).filter(Boolean);
+  if(!L.length)return;
+  if(L.length>150){toast('⚠️ الحد الأقصى 150 مادة في الطلب');return}
+  const last=+localStorage.getItem('st_last')||0;
+  if(Date.now()-last<20000){toast('⏳ انتظر قليلاً قبل إرسال طلب آخر');return}
+  const b=$('sb');b.disabled=true;b.textContent='جارٍ الإرسال...';
+  const o={name,phone,address:$('fa').value.trim(),note:$('fo').value.trim(),items:L,total:L.reduce((s,x)=>s+x.price*x.qty,0),ts:Date.now(),status:'new',src:'store'};
+  try{
+    const ref=await Promise.race([db.collection('storeOrders').add(o),new Promise((_,rj)=>setTimeout(()=>rj(new Error('timeout')),15000))]);
+    try{localStorage.setItem('st_last',String(Date.now()));localStorage.setItem('st_cust',JSON.stringify({name,phone,addr:o.address}))}catch(e){}
+    cart={};saveCart();bar();draw(false);
+    $('box').innerHTML=`<div class="ok"><div class="big">✅</div><h3>تم استلام طلبك</h3><p>رقم الطلب: <b>${esc(ref.id.slice(0,6).toUpperCase())}</b></p><p style="color:var(--muted)">سيتواصل معك فريق BİRİNCİLER لتأكيد الطلب وتجهيزه.</p><button class="btn" onclick="closeCart()">حسناً</button></div>`;
+  }catch(e){
+    console.error(e);b.disabled=false;b.textContent='إرسال الطلب';
+    toast('❌ تعذّر الإرسال — تحقق من الاتصال وحاول مجدداً');
+  }
+}
+
+(async()=>{
+  build(await loadRows());
+  if(!items.length)$('grid').innerHTML='<div class="empty">تعذّر تحميل الكتالوج. حاول لاحقاً.</div>';
+  else draw();
+  bar();
+})();
+</script>
+</body>
+</html>
